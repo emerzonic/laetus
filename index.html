@@ -8,6 +8,7 @@
     <script type="text/javascript" src="data.js"></script>
     <script type="text/paperscript" canvas="myCanvas">
     var circles = [];
+    var inforDiv = document.getElementById("infoDiv");
     function onKeyDown(event) {
         var data = keyData[event.key];
         if (data) {
@@ -18,6 +19,7 @@
             var point = maximumPoint * randomPoint;
             var newCircle = new Path.Circle(point, 500);
             color = data.color;
+            inforDiv.style.backgroundColor = color;
             newCircle.fillColor = color;
             circles.push(newCircle);
         }
@@ -37,6 +39,9 @@
 </head>
 
 <body>
+    <div id="infoDiv">
+        <h2 class="info">Hit any letter key on your keyboard</h2>
+    </div>
     <canvas id="myCanvas" resize></canvas>
 </body>
 
