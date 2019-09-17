@@ -18,5 +18,19 @@ body,html{
 
 #infoDiv{
     background: #000;
-    padding:1% 0;;
+    padding:1% 0;
+}
+
+.ui.secondary.pointing.menu {
+    margin-left: 0;
+    margin-right: 0;
+    color:#ffff;
+}
+
+.ui.secondary.pointing.menu .item {
+    color:#fff;
+}
+
+.ui.secondary.pointing.menu .active.item {
+    color: rgba(9, 241, 40, 0.95);
 }

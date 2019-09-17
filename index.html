@@ -1,48 +1,138 @@
 <!DOCTYPE html>
 <html>
-
 <head>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/semantic-ui/2.3.3/semantic.min.css" />
     <link rel="stylesheet" href="style.css">
+</head>
+</head>
+<body>
+    <div id="infoDiv" class="ui secondary pointing menu">
+        <a class="shape item">
+            CIRCLE
+        </a>
+        <a class="shape item">
+            SQUARE
+        </a>
+        <a class="shape item">
+            RECTANGLE
+        </a>
+        <a class="shape item active">
+            TRIANGLE
+        </a>
+        <a class="shape item">
+            STAR
+        </a>
+        <div class="right menu">
+            <a class="ui item">
+                Laetus App
+            </a>
+        </div>
+    </div>
+    <canvas id="myCanvas" resize></canvas>
     <script type="text/javascript" src="paper-full.js"></script>
     <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/howler/2.1.2/howler.js"></script>
     <script type="text/javascript" src="data.js"></script>
     <script type="text/paperscript" canvas="myCanvas">
-    var circles = [];
+
+    //I know having your script in your html is awful but that's the only way paperscript will work
+    var allShapes = [];
     var inforDiv = document.getElementById("infoDiv");
+    var shapeMapping = {
+        circle: makeCircle,
+        star: makeStar,
+        triangle: makeTriangle,
+        rectangle:makeRectangle,
+        square:makeSquare
+    }
+
     function onKeyDown(event) {
         var data = keyData[event.key];
         if (data) {
-            var sound = data.sound;
-            sound.play();
-            var maximumPoint = new Point(view.size.width, view.size.height);
-            var randomPoint = Point.random();
-            var point = maximumPoint * randomPoint;
-            var newCircle = new Path.Circle(point, 500);
-            color = data.color;
-            inforDiv.style.backgroundColor = color;
-            newCircle.fillColor = color;
-            circles.push(newCircle);
+          drawShape(data);
         }
+    }
+
+    function drawShape(data){
+        data.sound.play();
+        changeNavBackground(data.color);
+        var activeShape = document.getElementsByClassName('active')[0].textContent
+        .trim()
+        .toLowerCase();
+        var draw = shapeMapping[activeShape];
+        return draw(data);
+    }
+
+    function makeCircle(data) {
+        var point = getRamdomPointInView();
+        var newCircle = new Path.Circle(point, 500);
+        newCircle.fillColor = data.color;;
+        allShapes.push(newCircle);
+    }
+
+    function getRamdomPointInView(){
+        var maximumPoint = getMaximumPoint();
+        var randomPoint = Point.random();
+        return maximumPoint * randomPoint;
+    }
+
+    function getMaximumPoint(){
+        return new Point(view.size.width, view.size.height);
+    }
+
+    function changeNavBackground(color){
+        inforDiv.style.backgroundColor = color;
+    }
+
+    function makeStar(data) {
+        var maximumPoint = getMaximumPoint();
+        var newStar = new Path.Star({
+            center: [randomPoint.x * view.size.width, randomPoint.y * view.size.height],
+            points: 5,
+            radius1: 500,
+            radius2: 150,
+            fillColor: data.color
+        });
+        allShapes.push(newStar);    
+    }
+
+    function makeSquare(data) {
+        var point = getRamdomPointInView();
+        var square = new Rectangle(new Point(point), new Size(500, 500));
+        var newSquare = new Path.Rectangle(square);
+        newSquare.fillColor = data.color;;
+        allShapes.push(newSquare);
+    }
+
+    function makeRectangle(data) {
+        var point = getRamdomPointInView();
+        var rectangle = new Rectangle(new Point(point), new Point(600, 400));
+        var newRectangle = new Path.Rectangle(rectangle);
+        newRectangle.fillColor = data.color;
+        allShapes.push(newRectangle);
+    }
+
+    function makeTriangle(data) {
+        var point = getRamdomPointInView();
+        var newTriangle = new Path.RegularPolygon(new Point(point), 3, 500);
+        newTriangle.fillColor = data.color;
+        allShapes.push(newTriangle);
     }
 
     function onFrame(event) {
-        for (var i = 0; i < circles.length; i++) {
-            circles[i].fillColor.hue += 1;
-            circles[i].scale(.9);
-            if(circles[i].area < 1){
-      circles[i].remove(); 
-      circles.splice(i, 1); 
-    }
+        for (var i = 0; i < allShapes.length; i++) {
+            allShapes[i].fillColor.hue += 1;
+            allShapes[i].scale(.9);
+            if(allShapes[i].area < 1){
+                allShapes[i].remove(); 
+                allShapes.splice(i, 1); 
+            }
         }
     } 
     </script>
-</head>
-
-<body>
-    <div id="infoDiv">
-        <h2 class="info">Hit any letter key on your keyboard.</h2>
-    </div>
-    <canvas id="myCanvas" resize></canvas>
+    <script src="https://code.jquery.com/jquery-3.3.1.min.js"
+        integrity="sha256-FgpCb/KJQlLNfOu91ta32o/NMZxltwRo8QtmkMRdAu8=" crossorigin="anonymous"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/semantic-ui/2.3.3/semantic.min.js"></script>
+    <script type="text/javascript" src="app.js"></script>
 </body>
 
 </html>
