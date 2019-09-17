@@ -7,7 +7,7 @@
 </head>
 <body>
     <div id="infoDiv" class="ui secondary pointing menu">
-        <a class="shape item">
+        <a class="shape item active">
             CIRCLE
         </a>
         <a class="shape item">
@@ -16,15 +16,15 @@
         <a class="shape item">
             RECTANGLE
         </a>
-        <a class="shape item active">
+        <a class="shape item">
             TRIANGLE
         </a>
         <a class="shape item">
             STAR
         </a>
         <div class="right menu">
-            <a class="ui item">
-                Laetus App
+            <a class="ui item logo">
+                LAETUS APP
             </a>
         </div>
     </div>
@@ -85,6 +85,7 @@
 
     function makeStar(data) {
         var maximumPoint = getMaximumPoint();
+        var randomPoint = Point.random();
         var newStar = new Path.Star({
             center: [randomPoint.x * view.size.width, randomPoint.y * view.size.height],
             points: 5,

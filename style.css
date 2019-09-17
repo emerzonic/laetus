@@ -16,21 +16,27 @@ body,html{
     margin:0;
 }
 
-#infoDiv{
-    background: #000;
-    padding:1% 0;
-}
-
 .ui.secondary.pointing.menu {
     margin-left: 0;
     margin-right: 0;
     color:#ffff;
+    background: #000;
+    margin-bottom: 0;
+    padding: 0.7%;
 }
 
 .ui.secondary.pointing.menu .item {
     color:#fff;
 }
 
+.ui.secondary.pointing.menu .item:hover {
+    color:rgb(167, 172, 173)!important;
+}
+
 .ui.secondary.pointing.menu .active.item {
     color: rgba(9, 241, 40, 0.95);
+}
+
+.logo{
+    pointer-events: none;
 }
