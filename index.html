@@ -22,6 +22,9 @@
         <a class="shape item">
             STAR
         </a>
+        <a class="shape item infoText">
+            Hit any letter key to start
+        </a>
         <div class="right menu">
             <a class="ui item logo">
                 LAETUS by Emerzonic Software
@@ -46,6 +49,7 @@
     }
 
     function onKeyDown(event) {
+        var infor = document.getElementsByClassName("infoText")[0].style.display = "none";
         var data = keyData[event.key];
         if (data) {
           drawShape(data);

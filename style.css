@@ -37,6 +37,6 @@ body,html{
     color: rgba(9, 241, 40, 0.95);
 }
 
-.logo{
+.logo, .infoText{
     pointer-events: none;
 }
