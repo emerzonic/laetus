@@ -36,7 +36,6 @@
     <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/howler/2.1.2/howler.js"></script>
     <script type="text/javascript" src="data.js"></script>
     <script type="text/paperscript" canvas="myCanvas">
-
     //I know having your script in your html is awful but that's the only way paperscript will work
     var allShapes = [];
     var inforDiv = document.getElementById("infoDiv");
@@ -57,8 +56,6 @@
     }
 
     function drawShape(data){
-        data.sound.play();
-        data.sound.play();
         data.sound.play();
         changeNavBackground(data.color);
         var activeShape = document.getElementsByClassName('active')[0].textContent
