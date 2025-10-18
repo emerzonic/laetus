@@ -26,6 +26,18 @@
             Hit any letter key to start
         </a>
         <div class="right menu">
+            <a class="ui item recording-control" id="recordBtn">
+                <i class="circle icon"></i> Record
+            </a>
+            <a class="ui item recording-control" id="stopBtn" style="display:none;">
+                <i class="stop icon"></i> Stop
+            </a>
+            <a class="ui item recording-control" id="playBtn" style="display:none;">
+                <i class="play icon"></i> Play
+            </a>
+            <a class="ui item recording-control" id="clearBtn" style="display:none;">
+                <i class="trash icon"></i> Clear
+            </a>
             <a class="ui item logo">
                 LAETUS by Emerzonic Software
             </a>
@@ -47,11 +59,56 @@
         square:makeSquare
     }
 
+    // Recording state
+    var isRecording = false;
+    var recordedEvents = [];
+    var recordingStartTime = 0;
+    var isPlaying = false;
+    var playbackTimeouts = [];
+
+    // Expose to global scope for UI access
+    window.paperRecording = {
+        startRecording: function() {
+            isRecording = true;
+            recordedEvents = [];
+            recordingStartTime = Date.now();
+        },
+        stopRecording: function() {
+            isRecording = false;
+            return recordedEvents.slice();
+        },
+        playRecording: function(events) {
+            recordedEvents = events.slice();
+            playRecording();
+        },
+        stopPlayback: function() {
+            stopPlayback();
+        },
+        clearRecording: function() {
+            recordedEvents = [];
+            isRecording = false;
+            isPlaying = false;
+            stopPlayback();
+        }
+    };
+
     function onKeyDown(event) {
         var infor = document.getElementsByClassName("infoText")[0].style.display = "none";
         var data = keyData[event.key];
         if (data) {
           drawShape(data);
+
+          // Record the event if recording is active
+          if (isRecording) {
+            var currentTime = Date.now();
+            var timestamp = currentTime - recordingStartTime;
+            var activeShape = document.getElementsByClassName('active')[0].textContent.trim().toLowerCase();
+            recordedEvents.push({
+              key: event.key,
+              timestamp: timestamp,
+              shape: activeShape
+            });
+          }
         }
     }
 
@@ -127,11 +184,162 @@
             allShapes[i].fillColor.hue += 1;
             allShapes[i].scale(.9);
             if(allShapes[i].area < 1){
-                allShapes[i].remove(); 
-                allShapes.splice(i, 1); 
+                allShapes[i].remove();
+                allShapes.splice(i, 1);
             }
         }
-    } 
+    }
+
+    // Playback function
+    function playRecording() {
+        if (recordedEvents.length === 0) return;
+
+        isPlaying = true;
+
+        // Clear any existing playback timeouts
+        for (var i = 0; i < playbackTimeouts.length; i++) {
+            clearTimeout(playbackTimeouts[i]);
+        }
+        playbackTimeouts = [];
+
+        // Schedule each recorded event
+        for (var i = 0; i < recordedEvents.length; i++) {
+            (function(eventData) {
+                var timeout = setTimeout(function() {
+                    var data = keyData[eventData.key];
+                    if (data) {
+                        // Temporarily set the active shape
+                        var currentActive = document.getElementsByClassName('active')[0];
+                        var shapeItems = document.getElementsByClassName('shape');
+
+                        // Find and activate the recorded shape
+                        for (var j = 0; j < shapeItems.length; j++) {
+                            var itemText = shapeItems[j].textContent.trim().toLowerCase();
+                            if (itemText === eventData.shape) {
+                                currentActive.classList.remove('active');
+                                shapeItems[j].classList.add('active');
+                                break;
+                            }
+                        }
+
+                        drawShape(data);
+                    }
+                }, eventData.timestamp);
+                playbackTimeouts.push(timeout);
+            })(recordedEvents[i]);
+        }
+
+        // Set a timeout to mark playback as finished
+        var lastEventTime = recordedEvents[recordedEvents.length - 1].timestamp;
+        var finalTimeout = setTimeout(function() {
+            isPlaying = false;
+            // Notify the UI that playback finished
+            if (window.onPlaybackFinished) {
+                window.onPlaybackFinished();
+            }
+        }, lastEventTime + 1000);
+        playbackTimeouts.push(finalTimeout);
+    }
+
+    // Stop playback
+    function stopPlayback() {
+        isPlaying = false;
+        for (var i = 0; i < playbackTimeouts.length; i++) {
+            clearTimeout(playbackTimeouts[i]);
+        }
+        playbackTimeouts = [];
+    }
+    </script>
+    <script>
+    // Recording control UI - needs to be outside PaperScript
+    var recordingState = {
+        isRecording: false,
+        recordedEvents: [],
+        recordingStartTime: 0,
+        isPlaying: false
+    };
+
+    // Callback for when playback finishes
+    window.onPlaybackFinished = function() {
+        recordingState.isPlaying = false;
+        updateRecordingUI();
+    };
+
+    function updateRecordingUI() {
+        var recordBtn = document.getElementById('recordBtn');
+        var stopBtn = document.getElementById('stopBtn');
+        var playBtn = document.getElementById('playBtn');
+        var clearBtn = document.getElementById('clearBtn');
+
+        if (recordingState.isRecording) {
+            recordBtn.style.display = 'none';
+            stopBtn.style.display = 'inline-block';
+            playBtn.style.display = 'none';
+            clearBtn.style.display = 'none';
+            recordBtn.style.color = '#e74c3c';
+        } else if (recordingState.isPlaying) {
+            recordBtn.style.display = 'none';
+            stopBtn.style.display = 'none';
+            playBtn.style.display = 'inline-block';
+            clearBtn.style.display = 'none';
+            playBtn.innerHTML = '<i class="spinner loading icon"></i> Playing';
+        } else if (recordingState.recordedEvents.length > 0) {
+            recordBtn.style.display = 'inline-block';
+            stopBtn.style.display = 'none';
+            playBtn.style.display = 'inline-block';
+            playBtn.innerHTML = '<i class="play icon"></i> Play';
+            clearBtn.style.display = 'inline-block';
+        } else {
+            recordBtn.style.display = 'inline-block';
+            stopBtn.style.display = 'none';
+            playBtn.style.display = 'none';
+            clearBtn.style.display = 'none';
+        }
+    }
+
+    window.addEventListener('DOMContentLoaded', function() {
+        document.getElementById('recordBtn').addEventListener('click', function() {
+            recordingState.isRecording = true;
+            recordingState.recordedEvents = [];
+            recordingState.recordingStartTime = Date.now();
+
+            // Use PaperScript exposed function
+            window.paperRecording.startRecording();
+
+            updateRecordingUI();
+        });
+
+        document.getElementById('stopBtn').addEventListener('click', function() {
+            recordingState.isRecording = false;
+
+            // Get recorded events from PaperScript context
+            recordingState.recordedEvents = window.paperRecording.stopRecording();
+
+            console.log('Recording stopped. Events recorded:', recordingState.recordedEvents.length);
+            console.log('Events:', recordingState.recordedEvents);
+
+            updateRecordingUI();
+        });
+
+        document.getElementById('playBtn').addEventListener('click', function() {
+            if (recordingState.isPlaying) {
+                window.paperRecording.stopPlayback();
+                recordingState.isPlaying = false;
+            } else {
+                // Send events to PaperScript context
+                window.paperRecording.playRecording(recordingState.recordedEvents);
+                recordingState.isPlaying = true;
+            }
+            updateRecordingUI();
+        });
+
+        document.getElementById('clearBtn').addEventListener('click', function() {
+            recordingState.recordedEvents = [];
+            recordingState.isPlaying = false;
+            window.paperRecording.clearRecording();
+            updateRecordingUI();
+        });
+    });
     </script>
     <script src="https://code.jquery.com/jquery-3.3.1.min.js"
         integrity="sha256-FgpCb/KJQlLNfOu91ta32o/NMZxltwRo8QtmkMRdAu8=" crossorigin="anonymous"></script>

@@ -40,3 +40,35 @@ body,html{
 .logo, .infoText{
     pointer-events: none;
 }
+
+.recording-control {
+    cursor: pointer;
+    transition: all 0.3s ease;
+    background-color: rgba(0, 0, 0, 0.8) !important;
+    border: 2px solid #fff !important;
+    border-radius: 4px;
+    padding: 8px 12px !important;
+    margin: 0 4px !important;
+    color: #fff !important;
+}
+
+.recording-control:hover {
+    transform: scale(1.05);
+    background-color: rgba(0, 0, 0, 0.9) !important;
+}
+
+#stopBtn {
+    animation: pulse 1.5s infinite;
+    font-weight: bold;
+    background-color: rgba(231, 76, 60, 0.9) !important;
+    border-color: #fff !important;
+}
+
+@keyframes pulse {
+    0%, 100% {
+        opacity: 1;
+    }
+    50% {
+        opacity: 0.6;
+    }
+}
